@@ -15,23 +15,31 @@ function renderReadingTime(post) {
 
     heading = document.querySelector("shreddit-post");
     heading = heading.querySelector("h1");
-    heading.insertAdjacentElement("beforeend", badge);
+
+    //reddit automatically cleans the url of query vars after the page loads -> trggiering the URL observer again
+    //This causes injection twice, this checks that p hasn't already been injected
+    if (!heading.querySelector("p")) {
+        heading.insertAdjacentElement("beforeend", badge);
+    }
 }
 
 renderReadingTime(document.querySelector("shreddit-post-text-body"));
 
-const observer = new MutationObserver((mutations) => {
-  for (const mutation of mutations) {
-    // If a new article was added.
-    for (const node of mutation.addedNodes) {
-      if (node instanceof Element && node.tagName === "shreddit-post-text-body") {
-        // Render the reading time for this particular article.
-        renderReadingTime(node);
-      }
+function startObserving() {
+    const post = document.querySelector("shreddit-post-text-body");
+    renderReadingTime(post);
+}
+
+//Observe URL change
+let lastUrl = location.href;
+const navObserver = new MutationObserver(() => {
+    if (location.href !== lastUrl) {
+        lastUrl = location.href;
+        console.log(`[RedditObserver] Navigation detected → ${lastUrl}`);
+
+        // Give Reddit a moment to render the new post
+        setTimeout(startObserving, 1000);
     }
-  }
 });
 
-observer.observe(document.querySelector('shreddit-app'), {
-  childList: true
-});
+navObserver.observe(document.body, { childList: true, subtree: true });
