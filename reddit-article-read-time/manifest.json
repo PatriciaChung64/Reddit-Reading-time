@@ -1,0 +1,14 @@
+{
+    "manifest_version": 3,
+    "name": "Reddit Post Reading time",
+    "version": "1.0",
+    "description": "Add the reading time to reddit posts (only the original post, not counting comments)",
+    "content_scripts": [
+        {
+            "js": ["scripts/content.js"],
+            "matches": [
+                "https://www.reddit.com/r/*"
+            ]
+        }
+    ]
+}
